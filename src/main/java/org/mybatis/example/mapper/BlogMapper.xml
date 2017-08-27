@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.mybatis.example.mapper.BlogMapper">
+
+    <select id="selectBlog" resultType="org.mybatis.example.bean.Blog">
+        select * from blog where id = #{id}
+    </select>
+
+    <select id="selectBlog2" resultType="map">
+        select * from blog where id = #{id}
+    </select>
+
+    <select id="search" resultType="org.mybatis.example.bean.Blog">
+        select * from blog
+        <where>
+            <if test="title != null and title != ''">
+                <bind name="pattern" value="'%' + title + '%'"/>
+                AND title like #{pattern}
+            </if>
+            <if test="content != null and content != ''">
+                <bind name="pattern2" value="'%' + content + '%'"/>
+                AND content like #{pattern2}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+
+            <!--多个status-->
+            <if test="mstatus != null and mstatus.size() > 0">
+                AND status IN
+                <foreach item="item" index="index" collection="mstatus"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+        <if test="start != null and limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <insert id="insertBlog" parameterType="org.mybatis.example.bean.Blog" useGeneratedKeys="true" keyColumn="id">
+        insert into blog (title, content, status) values (#{title}, #{content},
+        #{status})
+    </insert>
+
+    <update id="updateBlog" parameterType="org.mybatis.example.bean.Blog">
+        update blog set
+        title = #{title},
+        content = #{content},
+        status = #{status}
+        where id = #{id}
+    </update>
+
+    <update id="updateBlog2">
+        update blog
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBlog" parameterType="int">
+        delete from blog where id = #{id}
+    </delete>
+</mapper>
